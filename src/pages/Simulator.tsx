@@ -6,102 +6,47 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { 
   Coins, TrendingUp, TrendingDown, 
-  Zap, ShoppingCart, Coffee, Gamepad2, AlertCircle,
+  Zap, Gamepad2, AlertCircle,
   RefreshCw, Sparkles, ArrowRight, PieChart, Play, Pause,
-  Smartphone, Car, Film, Pill
+  Smartphone, Car, Cpu
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { PortfolioChart } from "@/components/simulator/PortfolioChart";
 import { NewsSection, NewsItem } from "@/components/simulator/NewsSection";
 
-// Real-life inspired companies (fictional versions)
+// Real stocks
 const companies = [
   {
-    id: "techgiant",
-    name: "TechGiant",
-    ticker: "TGT",
+    id: "aapl",
+    name: "Apple",
+    ticker: "AAPL",
     icon: Smartphone,
-    description: "Smartphones & computers (like Apple)",
+    description: "Technology company - smartphones, computers, and devices",
     color: "primary",
-    currentValue: 150,
-    volatility: 0.15,
-    riskLevel: "medium",
-  },
-  {
-    id: "shopmart",
-    name: "ShopMart",
-    ticker: "SHM",
-    icon: ShoppingCart,
-    description: "Online shopping & delivery (like Amazon)",
-    color: "warning",
-    currentValue: 180,
-    volatility: 0.2,
-    riskLevel: "medium",
-  },
-  {
-    id: "coffeeking",
-    name: "CoffeeKing",
-    ticker: "CFK",
-    icon: Coffee,
-    description: "Coffee shops worldwide (like Starbucks)",
-    color: "accent",
-    currentValue: 95,
-    volatility: 0.12,
-    riskLevel: "low",
-  },
-  {
-    id: "gamezone",
-    name: "GameZone",
-    ticker: "GMZ",
-    icon: Gamepad2,
-    description: "Video games & consoles (like Nintendo)",
-    color: "success",
-    currentValue: 65,
-    volatility: 0.25,
-    riskLevel: "high",
-  },
-  {
-    id: "electramotor",
-    name: "ElectraMotor",
-    ticker: "ELM",
-    icon: Car,
-    description: "Electric vehicles (like Tesla)",
-    color: "secondary",
-    currentValue: 220,
-    volatility: 0.3,
-    riskLevel: "high",
-  },
-  {
-    id: "streamflix",
-    name: "StreamFlix",
-    ticker: "STF",
-    icon: Film,
-    description: "Streaming movies & shows (like Netflix)",
-    color: "destructive",
-    currentValue: 110,
+    currentValue: 175,
     volatility: 0.18,
     riskLevel: "medium",
   },
   {
-    id: "healthplus",
-    name: "HealthPlus",
-    ticker: "HPL",
-    icon: Pill,
-    description: "Medicine & healthcare (like Johnson & Johnson)",
-    color: "success",
-    currentValue: 140,
-    volatility: 0.08,
-    riskLevel: "low",
+    id: "tsla",
+    name: "Tesla",
+    ticker: "TSLA",
+    icon: Car,
+    description: "Electric vehicles and clean energy",
+    color: "secondary",
+    currentValue: 240,
+    volatility: 0.3,
+    riskLevel: "high",
   },
   {
-    id: "energytech",
-    name: "EnergyTech",
-    ticker: "ENT",
-    icon: Zap,
-    description: "Solar & clean energy (like First Solar)",
+    id: "nvda",
+    name: "Nvidia",
+    ticker: "NVDA",
+    icon: Cpu,
+    description: "Graphics processors and AI chips",
     color: "primary",
-    currentValue: 85,
-    volatility: 0.22,
+    currentValue: 450,
+    volatility: 0.25,
     riskLevel: "high",
   },
 ];
@@ -109,32 +54,32 @@ const companies = [
 const newsScenarios: NewsItem[][] = [
   // Scenario 1: Tech boom
   [
-    { id: "n1", day: 1, headline: "TechGiant announces revolutionary new smartphone!", description: "Sales expected to surge as new model breaks pre-order records.", impact: "positive", affectedStocks: ["TechGiant", "ShopMart"] },
-    { id: "n2", day: 2, headline: "Coffee prices rise due to supply shortage", description: "Global coffee bean shortage affects major chains.", impact: "negative", affectedStocks: ["CoffeeKing"] },
-    { id: "n3", day: 3, headline: "GameZone's new console sells out in minutes!", description: "Holiday season looking strong for gaming industry.", impact: "positive", affectedStocks: ["GameZone"] },
-    { id: "n4", day: 4, headline: "Electric vehicle demand continues to grow", description: "Government incentives boost EV sales nationwide.", impact: "positive", affectedStocks: ["ElectraMotor", "EnergyTech"] },
-    { id: "n5", day: 5, headline: "StreamFlix loses subscribers to competition", description: "New streaming services take market share.", impact: "negative", affectedStocks: ["StreamFlix"] },
+    { id: "n1", day: 1, headline: "Apple announces revolutionary new iPhone!", description: "Sales expected to surge as new model breaks pre-order records.", impact: "positive", affectedStocks: ["Apple"] },
+    { id: "n2", day: 2, headline: "Nvidia reports strong AI chip demand", description: "Data centers increasing orders for AI processors.", impact: "positive", affectedStocks: ["Nvidia"] },
+    { id: "n3", day: 3, headline: "Tesla delivers record number of vehicles", description: "Production capacity expansion drives strong quarterly results.", impact: "positive", affectedStocks: ["Tesla"] },
+    { id: "n4", day: 4, headline: "Electric vehicle adoption accelerates globally", description: "Government incentives boost EV sales nationwide.", impact: "positive", affectedStocks: ["Tesla"] },
+    { id: "n5", day: 5, headline: "Tech stocks face chip supply constraints", description: "Manufacturing delays affect production timelines.", impact: "negative", affectedStocks: ["Apple", "Nvidia"] },
   ],
-  // Scenario 2: Economic downturn
+  // Scenario 2: Market volatility
   [
-    { id: "n1", day: 1, headline: "Economic concerns grow as inflation rises", description: "Consumers cutting back on non-essential spending.", impact: "negative", affectedStocks: ["TechGiant", "GameZone", "StreamFlix"] },
-    { id: "n2", day: 2, headline: "HealthPlus reports strong earnings", description: "Healthcare remains stable during uncertain times.", impact: "positive", affectedStocks: ["HealthPlus"] },
-    { id: "n3", day: 3, headline: "ShopMart expands same-day delivery", description: "Online shopping continues to grow despite economy.", impact: "positive", affectedStocks: ["ShopMart"] },
-    { id: "n4", day: 4, headline: "Oil prices spike, affecting transportation", description: "Higher fuel costs impact multiple industries.", impact: "negative", affectedStocks: ["ElectraMotor", "CoffeeKing"] },
-    { id: "n5", day: 5, headline: "Solar energy investments increase", description: "Clean energy sector sees growing interest.", impact: "positive", affectedStocks: ["EnergyTech"] },
+    { id: "n1", day: 1, headline: "Economic concerns grow as inflation rises", description: "Consumers cutting back on non-essential spending.", impact: "negative", affectedStocks: ["Apple", "Tesla", "Nvidia"] },
+    { id: "n2", day: 2, headline: "Nvidia launches new AI chip architecture", description: "Next-generation processors promise significant performance gains.", impact: "positive", affectedStocks: ["Nvidia"] },
+    { id: "n3", day: 3, headline: "Apple expands into new markets", description: "Company announces major partnerships in emerging regions.", impact: "positive", affectedStocks: ["Apple"] },
+    { id: "n4", day: 4, headline: "Tesla faces supply chain challenges", description: "Battery material shortages impact production.", impact: "negative", affectedStocks: ["Tesla"] },
+    { id: "n5", day: 5, headline: "AI demand continues to surge", description: "Enterprise adoption drives chip sales higher.", impact: "positive", affectedStocks: ["Nvidia", "Apple"] },
   ],
   // Scenario 3: Mixed market
   [
-    { id: "n1", day: 1, headline: "CoffeeKing opens 500 new locations", description: "Expansion into new markets drives optimism.", impact: "positive", affectedStocks: ["CoffeeKing"] },
-    { id: "n2", day: 2, headline: "TechGiant faces chip shortage delays", description: "Production slowdowns affect new product launches.", impact: "negative", affectedStocks: ["TechGiant"] },
-    { id: "n3", day: 3, headline: "GameZone announces popular franchise sequel", description: "Fans excited for upcoming release.", impact: "positive", affectedStocks: ["GameZone"] },
-    { id: "n4", day: 4, headline: "ElectraMotor recalls vehicles for safety fix", description: "Company addresses battery concerns proactively.", impact: "negative", affectedStocks: ["ElectraMotor"] },
-    { id: "n5", day: 5, headline: "StreamFlix wins multiple awards for original content", description: "Quality programming attracts new subscribers.", impact: "positive", affectedStocks: ["StreamFlix"] },
+    { id: "n1", day: 1, headline: "Apple faces production delays", description: "Supply chain issues affect new product launches.", impact: "negative", affectedStocks: ["Apple"] },
+    { id: "n2", day: 2, headline: "Tesla announces new Supercharger network expansion", description: "Infrastructure growth supports EV adoption.", impact: "positive", affectedStocks: ["Tesla"] },
+    { id: "n3", day: 3, headline: "Nvidia partners with major tech companies", description: "Strategic alliances boost market position.", impact: "positive", affectedStocks: ["Nvidia"] },
+    { id: "n4", day: 4, headline: "Competition increases in electric vehicle market", description: "New entrants challenge established players.", impact: "negative", affectedStocks: ["Tesla"] },
+    { id: "n5", day: 5, headline: "Tech sector shows strong earnings growth", description: "Consumer demand remains robust across product lines.", impact: "positive", affectedStocks: ["Apple", "Nvidia", "Tesla"] },
   ],
 ];
 
 const Simulator = () => {
-  const [tokens, setTokens] = useState(1000);
+  const [cash, setCash] = useState(10000);
   const [allocations, setAllocations] = useState<Record<string, number>>(
     Object.fromEntries(companies.map(c => [c.id, 0]))
   );
@@ -154,7 +99,7 @@ const Simulator = () => {
   );
 
   const totalAllocated = Object.values(allocations).reduce((sum, val) => sum + val, 0) + etfAllocation;
-  const remainingTokens = tokens - totalAllocated;
+  const remainingCash = cash - totalAllocated;
 
   const calculatePortfolioValue = (prices: Record<string, number>) => {
     let total = 0;
@@ -182,7 +127,7 @@ const Simulator = () => {
       .filter(([id]) => id !== companyId)
       .reduce((sum, [, val]) => sum + val, 0) + etfAllocation;
     
-    if (newValue + otherAllocations <= tokens) {
+    if (newValue + otherAllocations <= cash) {
       setAllocations(prev => ({ ...prev, [companyId]: newValue }));
     }
   };
@@ -191,7 +136,7 @@ const Simulator = () => {
     const newValue = value[0];
     const companyTotal = Object.values(allocations).reduce((sum, val) => sum + val, 0);
     
-    if (newValue + companyTotal <= tokens) {
+    if (newValue + companyTotal <= cash) {
       setEtfAllocation(newValue);
     }
   };
@@ -278,7 +223,7 @@ const startSimulation = () => {
           </div>
         </section>
 
-        {/* Tokens Display */}
+        {/* Cash Display */}
         <section className="border-b border-border bg-card">
           <div className="container py-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -287,21 +232,21 @@ const startSimulation = () => {
                   <Coins className="h-7 w-7 text-accent" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Your Virtual Tokens</p>
-                  <p className="font-display text-2xl font-bold text-foreground">{tokens.toLocaleString()}</p>
+                  <p className="text-sm text-muted-foreground">Your Cash</p>
+                  <p className="font-display text-2xl font-bold text-foreground">${cash.toLocaleString()}</p>
                 </div>
               </div>
               
               <div className="flex items-center gap-4">
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Allocated</p>
-                  <p className="font-semibold text-foreground">{totalAllocated.toLocaleString()}</p>
+                  <p className="font-semibold text-foreground">${totalAllocated.toLocaleString()}</p>
                 </div>
                 <div className="h-8 w-px bg-border" />
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Remaining</p>
-                  <p className={`font-semibold ${remainingTokens > 0 ? "text-success" : "text-muted-foreground"}`}>
-                    {remainingTokens.toLocaleString()}
+                  <p className={`font-semibold ${remainingCash > 0 ? "text-success" : "text-muted-foreground"}`}>
+                    ${remainingCash.toLocaleString()}
                   </p>
                 </div>
               </div>
@@ -332,7 +277,7 @@ const startSimulation = () => {
                         key={company.id}
                         company={company}
                         allocation={allocations[company.id]}
-                        maxTokens={tokens}
+                        maxCash={cash}
                         onAllocationChange={(value) => handleAllocationChange(company.id, value)}
                       />
                     ))}

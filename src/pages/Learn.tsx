@@ -7,12 +7,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Building2, TrendingUp, PieChart, Scale, Brain, 
   ChevronRight, CheckCircle2, Lock, Sparkles, ArrowRight, MessageCircle,
-  Shield, Clock, Wallet, BarChart3
+  Shield, Clock, Wallet, BarChart3, Target, Calendar, DollarSign, Globe, Store, Briefcase, RefreshCw, AlertTriangle, X
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AITutor } from "@/components/learn/AITutor";
 
 const lessons = [
+  // Beginner Level - Fundamentals
+  {
+    id: "investing",
+    icon: Target,
+    title: "What Is Investing?",
+    description: "Understand what investing means and how it differs from saving",
+    duration: "5 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Investing means putting money into something with the goal of growing it over time. When you invest, you are accepting some risk in exchange for possible reward. Investing is different from saving, which is about protecting money, not growing it..."
+  },
   {
     id: "company",
     icon: Building2,
@@ -21,7 +33,7 @@ const lessons = [
     duration: "5 min",
     completed: false,
     locked: false,
-    color: "primary",
+    color: "accent",
     preview: "Think of a company like a lemonade stand, but much bigger! When you run a lemonade stand, you create something people want (delicious lemonade) and sell it to make money..."
   },
   {
@@ -32,7 +44,7 @@ const lessons = [
     duration: "7 min",
     completed: false,
     locked: false,
-    color: "secondary",
+    color: "accent",
     preview: "Imagine if you could own a tiny piece of your favorite pizza shop. Every time they sell a pizza, you'd get a small share of the profits..."
   },
   {
@@ -54,7 +66,7 @@ const lessons = [
     duration: "8 min",
     completed: false,
     locked: false,
-    color: "success",
+    color: "accent",
     preview: "Would you put all your eggs in one basket? What if you dropped it? The same idea applies to investing — spreading out helps protect you..."
   },
   {
@@ -65,8 +77,64 @@ const lessons = [
     duration: "6 min",
     completed: false,
     locked: false,
-    color: "warning",
+    color: "accent",
     preview: "Imagine buying a variety pack instead of just one flavor. An ETF is like a variety pack of stocks — you get a bit of everything in one purchase..."
+  },
+  // Intermediate Level - Strategy & Context
+  {
+    id: "longterm",
+    icon: Calendar,
+    title: "Long-Term vs Short-Term Investing",
+    description: "Learn the difference between quick trades and patient growth",
+    duration: "6 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Short-term investing focuses on quick price changes. Long-term investing focuses on growth over time. Long-term investing usually involves less stress and fewer decisions. A stock might drop one week but grow steadily over five years..."
+  },
+  {
+    id: "exchange",
+    icon: Store,
+    title: "What Is a Stock Exchange?",
+    description: "Learn where stocks are bought and sold",
+    duration: "5 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Stock exchanges are places where stocks are bought and sold. Examples include NYSE and NASDAQ. They help match buyers and sellers. A buyer wants to purchase a stock, a seller wants to sell it, and the exchange connects them..."
+  },
+  {
+    id: "dividends",
+    icon: DollarSign,
+    title: "How Dividends Work",
+    description: "Learn how companies share profits with shareholders",
+    duration: "5 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Some companies pay dividends to shareholders. Dividends provide income, not just price growth. Not all companies pay dividends. A company pays a small amount to shareholders each year, and investors earn money even if the price doesn't change..."
+  },
+  {
+    id: "marketmovements",
+    icon: BarChart3,
+    title: "Why Do Markets Go Up and Down?",
+    description: "Understand what causes market fluctuations and price changes",
+    duration: "6 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Markets react to economic news, interest rates, and events. Fear and confidence influence prices. Short-term movements are unpredictable. News about higher interest rates causes markets to drop, but long-term investors wait instead of reacting..."
+  },
+  {
+    id: "economy",
+    icon: Globe,
+    title: "How the Economy Affects Investing",
+    description: "Understand how economic factors impact the stock market",
+    duration: "6 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "The stock market reflects the overall economy. Things like jobs, inflation, and interest rates matter. Economic changes affect many companies at once. When interest rates rise, borrowing becomes more expensive, companies may grow more slowly, and stock prices can fall..."
   },
   {
     id: "risk",
@@ -76,7 +144,7 @@ const lessons = [
     duration: "7 min",
     completed: false,
     locked: false,
-    color: "destructive",
+    color: "accent",
     preview: "Every investment has some level of risk. Think of riding a bike — going slow is safe, racing downhill is exciting but risky..."
   },
   {
@@ -98,7 +166,7 @@ const lessons = [
     duration: "5 min",
     completed: false,
     locked: false,
-    color: "success",
+    color: "accent",
     preview: "Saving is like storing food in your refrigerator. Investing is like planting a garden. Both are important for different reasons..."
   },
   {
@@ -109,8 +177,53 @@ const lessons = [
     duration: "6 min",
     completed: false,
     locked: false,
-    color: "secondary",
+    color: "accent",
     preview: "Good news about a company usually makes its stock rise. Bad news makes it fall. Learn why and how to read market reactions..."
+  },
+  // Advanced Level - Portfolio Management & Responsibility
+  {
+    id: "portfolio",
+    icon: Briefcase,
+    title: "What Is a Portfolio?",
+    description: "Learn how to think about all your investments together",
+    duration: "5 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "A portfolio is all your investments together. Balance matters more than individual picks. Portfolios change over time. An investor owns stocks, ETFs, and cash. Losses in one area may be balanced by gains in another..."
+  },
+  {
+    id: "rebalancing",
+    icon: RefreshCw,
+    title: "Rebalancing a Portfolio",
+    description: "Learn how to adjust your portfolio to maintain balance",
+    duration: "6 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Over time, some investments grow faster than others. Rebalancing adjusts the portfolio back to balance. It helps manage risk. Tech stocks grow quickly, the portfolio becomes risky, and the investor rebalances..."
+  },
+  {
+    id: "responsible",
+    icon: AlertTriangle,
+    title: "Responsible Investing",
+    description: "Understand the risks and responsibilities of investing",
+    duration: "6 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Investing involves risk and responsibility. No one can predict the market perfectly. Learning matters more than winning. Someone promises guaranteed profits, but this is unrealistic and risky..."
+  },
+  {
+    id: "notinvesting",
+    icon: X,
+    title: "What Investing Is NOT",
+    description: "Learn what investing is not and how to avoid common mistakes",
+    duration: "6 min",
+    completed: false,
+    locked: false,
+    color: "accent",
+    preview: "Investing is not gambling. Investing is not a shortcut to quick money. Investing requires patience and understanding. Someone buys stocks based on hype and loses money quickly..."
   },
 ];
 

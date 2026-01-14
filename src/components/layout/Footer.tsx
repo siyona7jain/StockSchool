@@ -9,7 +9,7 @@ export function Footer() {
           {/* Brand */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-primary overflow-hidden">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white overflow-hidden">
                 <img src="/logo.png" alt="Logo" className="h-full w-full object-contain" />
               </div>
               <span className="font-display text-xl font-bold text-foreground">

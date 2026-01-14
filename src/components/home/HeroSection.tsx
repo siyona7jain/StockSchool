@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import { ArrowRight, BookOpen, Sparkles, TrendingUp, PieChart, Shield } from "lucide-react";
 
@@ -12,14 +13,12 @@ export function HeroSection() {
           loop
           muted
           playsInline
-          className="absolute inset-0 w-full h-full object-cover opacity-60 video-mint-filter"
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
         >
           <source src="/stock-market-video.mp4" type="video/mp4" />
-          <source src="/stock-market-video.webm" type="video/webm" />
         </video>
-        {/* Overlay for better text readability and color harmony */}
-        <div className="absolute inset-0 bg-white/40" />
-        <div className="absolute inset-0 bg-accent-lighter/20" />
+        {/* Overlay for better text readability */}
+        <div className="absolute inset-0 bg-white/50" />
       </div>
 
       <div className="container relative z-10">
@@ -95,12 +94,16 @@ function FeaturePreview({
   delay: string;
 }) {
   return (
-    <div className={`group rounded-lg bg-accent-lighter border-0 p-8 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-slide-up ${delay}`}>
-      <div className={`inline-flex h-12 w-12 items-center justify-center rounded-lg bg-accent/20 text-accent-dark mb-6 transition-transform group-hover:scale-110`}>
-        <Icon className="h-6 w-6" />
-      </div>
-      <h3 className="font-display font-semibold text-lg text-accent-dark mb-3">{title}</h3>
-      <p className="text-sm text-accent-dark/80">{description}</p>
-    </div>
+    <Card variant="interactive" className={`animate-slide-up ${delay}`}>
+      <CardHeader className="pb-2">
+        <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-accent-lighter text-accent mb-3">
+          <Icon className="h-7 w-7" />
+        </div>
+        <CardTitle className="text-xl">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
   );
 }
