@@ -249,158 +249,158 @@ export function AITutor() {
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
-  };
+    };
 
   return (
     <>
       {/* Regular view - only shown when modal is closed */}
       {!isFullscreen && (
         <div className="flex gap-4 h-[600px]">
-          {/* Chat Sidebar */}
-          {user && (
-            <Card className="w-40 flex-shrink-0 flex flex-col">
-              <CardHeader className="pb-2 border-b px-3 pt-3">
-                <Button
-                  onClick={handleNewChat}
-                  className="w-full text-xs h-8"
-                  variant="default"
-                  size="sm"
+      {/* Chat Sidebar */}
+      {user && (
+        <Card className="w-40 flex-shrink-0 flex flex-col">
+          <CardHeader className="pb-2 border-b px-3 pt-3">
+            <Button
+              onClick={handleNewChat}
+              className="w-full text-xs h-8"
+              variant="default"
+              size="sm"
+            >
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              New Chat
+            </Button>
+          </CardHeader>
+          <ScrollArea className="flex-1">
+            <div className="p-1.5 space-y-0.5">
+              {chatList.map((chat) => (
+                <div
+                  key={chat.id}
+                  onClick={() => handleSelectChat(chat.id)}
+                  className={cn(
+                    "group relative flex items-center gap-1.5 p-1.5 rounded-md cursor-pointer transition-colors",
+                    currentChatId === chat.id
+                      ? "bg-accent text-accent-foreground"
+                      : "hover:bg-muted"
+                  )}
                 >
-                  <Plus className="h-3.5 w-3.5 mr-1.5" />
-                  New Chat
-                </Button>
-              </CardHeader>
-              <ScrollArea className="flex-1">
-                <div className="p-1.5 space-y-0.5">
-                  {chatList.map((chat) => (
-                    <div
-                      key={chat.id}
-                      onClick={() => handleSelectChat(chat.id)}
-                      className={cn(
-                        "group relative flex items-center gap-1.5 p-1.5 rounded-md cursor-pointer transition-colors",
-                        currentChatId === chat.id
-                          ? "bg-accent text-accent-foreground"
-                          : "hover:bg-muted"
-                      )}
-                    >
-                      <Button
-                        variant="ghost"
-                        size="icon"
+                  <Button
+                    variant="ghost"
+                    size="icon"
                         className="h-5 w-5 opacity-0 group-hover:opacity-100 group-hover:w-5 w-0 flex-shrink-0 transition-all overflow-hidden"
-                        onClick={(e) => handleDeleteChat(chat.id, e)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
+                    onClick={(e) => handleDeleteChat(chat.id, e)}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                       <MessageSquare className="h-3.5 w-3.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium truncate">{chat.title}</p>
                       </div>
-                    </div>
-                  ))}
-                  {chatList.length === 0 && (
-                    <div className="text-center py-6 text-xs text-muted-foreground px-2">
-                      No chats yet. Start a new conversation!
-                    </div>
-                  )}
                 </div>
-              </ScrollArea>
-            </Card>
-          )}
-
-          {/* Chat Content */}
-          <Card variant="highlighted" className="flex-1 flex flex-col">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-lighter">
-                    <Sparkles className="h-5 w-5 text-accent" />
-                  </div>
-                  AI Tutor
-                </CardTitle>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={toggleFullscreen}
-                  className="h-8 w-8"
-                >
-                  <Maximize2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="flex-1 flex flex-col min-h-0 p-4 pt-0">
-              <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
-                <div className="space-y-4">
-                  {messages.map((msg, i) => (
-                    <div
-                      key={i}
-                      className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
-                    >
-                      <div
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
-                          msg.role === "user"
-                            ? "bg-secondary-light text-secondary"
-                            : "bg-primary-light text-primary"
-                        }`}
-                      >
-                        {msg.role === "user" ? (
-                          <User className="h-4 w-4" />
-                        ) : (
-                          <Sparkles className="h-4 w-4" />
-                        )}
-                      </div>
-                      <div
-                        className={`rounded-2xl px-4 py-2.5 max-w-[85%] ${
-                          msg.role === "user"
-                            ? "bg-secondary text-secondary-foreground"
-                            : "bg-muted text-foreground"
-                        }`}
-                      >
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-
-              {/* Suggested Questions */}
-              {messages.length === 1 && (
-                <div className="flex flex-wrap gap-2 py-3">
-                  {suggestedQuestions.map((q) => (
-                    <Button
-                      key={q}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleSend(q)}
-                      className="text-xs"
-                    >
-                      {q}
-                    </Button>
-                  ))}
+              ))}
+              {chatList.length === 0 && (
+                <div className="text-center py-6 text-xs text-muted-foreground px-2">
+                  No chats yet. Start a new conversation!
                 </div>
               )}
+            </div>
+          </ScrollArea>
+        </Card>
+      )}
 
-              {/* Input */}
-              <div className="flex gap-2 pt-3 border-t border-border mt-3">
-                <Textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Ask me anything about the stock market..."
-                  className="min-h-[44px] max-h-[120px] resize-none"
-                  disabled={isLoading}
-                />
-                <Button
-                  onClick={() => handleSend()}
-                  disabled={isLoading || !input.trim()}
-                  size="icon"
-                  className="shrink-0"
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
+      {/* Chat Content */}
+      <Card variant="highlighted" className="flex-1 flex flex-col">
+        <CardHeader className="pb-3">
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-lighter">
+                <Sparkles className="h-5 w-5 text-accent" />
               </div>
-            </CardContent>
-          </Card>
-        </div>
+              AI Tutor
+            </CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleFullscreen}
+              className="h-8 w-8"
+            >
+                <Maximize2 className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="flex-1 flex flex-col min-h-0 p-4 pt-0">
+          <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
+            <div className="space-y-4">
+              {messages.map((msg, i) => (
+                <div
+                  key={i}
+                  className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}
+                >
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${
+                      msg.role === "user"
+                        ? "bg-secondary-light text-secondary"
+                        : "bg-primary-light text-primary"
+                    }`}
+                  >
+                    {msg.role === "user" ? (
+                      <User className="h-4 w-4" />
+                    ) : (
+                      <Sparkles className="h-4 w-4" />
+                    )}
+                  </div>
+                  <div
+                    className={`rounded-2xl px-4 py-2.5 max-w-[85%] ${
+                      msg.role === "user"
+                        ? "bg-secondary text-secondary-foreground"
+                        : "bg-muted text-foreground"
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </ScrollArea>
+
+          {/* Suggested Questions */}
+          {messages.length === 1 && (
+            <div className="flex flex-wrap gap-2 py-3">
+              {suggestedQuestions.map((q) => (
+                <Button
+                  key={q}
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleSend(q)}
+                  className="text-xs"
+                >
+                  {q}
+                </Button>
+              ))}
+            </div>
+          )}
+
+          {/* Input */}
+          <div className="flex gap-2 pt-3 border-t border-border mt-3">
+            <Textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Ask me anything about the stock market..."
+              className="min-h-[44px] max-h-[120px] resize-none"
+              disabled={isLoading}
+            />
+            <Button
+              onClick={() => handleSend()}
+              disabled={isLoading || !input.trim()}
+              size="icon"
+              className="shrink-0"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
       )}
 
       {/* Modal Popup Dialog */}

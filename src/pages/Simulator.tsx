@@ -199,7 +199,7 @@ const levelConfig = {
     showETF: false,
     volatilityMultiplier: 0.6,
     winConditions: {
-      portfolioValue: 11000, // Portfolio ≥ $11,000
+      portfolioValue: 10200, // Portfolio ≥ $10,200
       newsInfluencedTrade: true, // At least 1 trade influenced by news
     },
   },
@@ -240,8 +240,8 @@ const levelConfig = {
     transactionFee: 0.01, // 1% transaction fee
     tradeLimit: 3, // 3 trades per day
     winConditions: {
-      portfolioValue: 11200, // Portfolio ≥ $11,200
-      minPortfolioValue: 8500, // Never drop below $8,500
+      portfolioValue: 10200, // Portfolio ≥ $10,200 (2% gain - achievable after crash)
+      minPortfolioValue: 7500, // Never drop below $7,500 (allows 25% drawdown from crash)
     },
   },
   6: {
@@ -353,10 +353,11 @@ const newsScenarios: Record<number, NewsItem[][]> = {
   2: [
     [
       { id: "n1", day: 1, headline: "Apple announces new iPhone", description: "Strong pre-orders expected.", impact: "positive", affectedStocks: ["Apple"] },
-      { id: "n2", day: 3, headline: "Tesla delivers record vehicles", description: "Production beats expectations.", impact: "positive", affectedStocks: ["Tesla"] },
-      { id: "n3", day: 5, headline: "Nvidia reports AI chip demand", description: "Data center orders surge.", impact: "positive", affectedStocks: ["Nvidia"] },
-      { id: "n4", day: 8, headline: "Microsoft cloud growth slows", description: "Enterprise adoption moderates.", impact: "negative", affectedStocks: ["Microsoft"] },
-      { id: "n5", day: 12, headline: "Google faces ad revenue decline", description: "Digital advertising market softens.", impact: "negative", affectedStocks: ["Alphabet"] },
+      { id: "n2", day: 2, headline: "Tech sector rallies", description: "Major tech stocks surge together.", impact: "positive", affectedStocks: ["Apple", "Tesla", "Nvidia"] },
+      { id: "n3", day: 3, headline: "Tesla delivers record vehicles", description: "Production beats expectations.", impact: "positive", affectedStocks: ["Tesla"] },
+      { id: "n4", day: 5, headline: "Nvidia reports AI chip demand", description: "Data center orders surge.", impact: "positive", affectedStocks: ["Nvidia"] },
+      { id: "n5", day: 8, headline: "Microsoft cloud growth slows", description: "Enterprise adoption moderates.", impact: "negative", affectedStocks: ["Microsoft"] },
+      { id: "n6", day: 12, headline: "Google faces ad revenue decline", description: "Digital advertising market softens.", impact: "negative", affectedStocks: ["Alphabet"] },
     ],
   ],
   3: [
@@ -509,16 +510,23 @@ const Simulator = () => {
 
   const calculatePortfolioValue = (prices: Record<string, number>) => {
     let total = 0;
+    // Only count stocks you actually own (amount > 0)
     Object.entries(allocations).forEach(([id, amount]) => {
-      if (amount > 0) {
-        const company = levelCompanies.find(c => c.id === id)!;
+      if (amount > 0 && amount > 0.01) { // Strict check: must have meaningful allocation
+        const company = levelCompanies.find(c => c.id === id);
+        if (company && prices[id] && company.currentValue > 0) {
         const priceChange = prices[id] / company.currentValue;
         total += amount * priceChange;
+        }
       }
     });
-    if (etfAllocation > 0 && config.showETF) {
+    // ETF only counts if you actually allocated to it
+    if (etfAllocation > 0 && etfAllocation > 0.01 && config.showETF) {
       const avgChange = levelCompanies.reduce((sum, company) => {
-        return sum + (prices[company.id] / company.currentValue);
+        if (prices[company.id] && company.currentValue > 0) {
+          return sum + (prices[company.id] / company.currentValue);
+        }
+        return sum;
       }, 0) / levelCompanies.length;
       total += etfAllocation * avgChange;
     }
@@ -536,16 +544,49 @@ const Simulator = () => {
       if (simulationStarted && oldValue !== newValue) {
         setTradeCount(prev => prev + 1);
         setDailyTradeCount(prev => prev + 1);
+      }
+      
+      // Track news-influenced trades for level 2
+      // Counts if you have a position in a stock with POSITIVE news (even if allocated before news)
+      if (currentLevel === 2) {
+        // Check for news on current day, previous day, or next day
+        const todayNews = news.find(n => 
+          n.day === currentDay || 
+          n.day === currentDay - 1 || 
+          n.day === currentDay + 1
+        );
+        const company = levelCompanies.find(c => c.id === companyId);
         
-        // Track news-influenced trades for level 2
-        if (currentLevel === 2) {
-          const todayNews = news.find(n => n.day === currentDay);
-          const company = levelCompanies.find(c => c.id === companyId);
-          if (todayNews && company && todayNews.affectedStocks.includes(company.name)) {
-            setNewsInfluencedTrades(prev => prev + 1);
-          }
+        // Only count if:
+        // 1. News exists and affects this stock
+        // 2. News is POSITIVE (impact === "positive")
+        // 3. You have a position in this stock (newValue > 0)
+        // 4. Either you're increasing your position OR this is your first allocation
+        const isPositiveNews = todayNews && todayNews.impact === "positive";
+        const hasPosition = newValue > 0;
+        const isNewInvestment = oldValue === 0 && newValue > 0;
+        const isIncreasingPosition = newValue > oldValue;
+        
+        console.log(`Level 2 Trade Check: day=${currentDay}, company=${company?.name}, oldValue=${oldValue}, newValue=${newValue}`);
+        console.log(`  todayNews=`, todayNews, `impact=${todayNews?.impact}, affectedStocks=`, todayNews?.affectedStocks);
+        console.log(`  isPositiveNews=${isPositiveNews}, hasPosition=${hasPosition}, isNewInvestment=${isNewInvestment}, isIncreasingPosition=${isIncreasingPosition}`);
+        
+        if (todayNews && company && todayNews.affectedStocks.includes(company.name) && isPositiveNews && hasPosition && (isNewInvestment || isIncreasingPosition)) {
+          setNewsInfluencedTrades(prev => {
+            // Only increment if we haven't already counted this stock for this news item
+            const alreadyCounted = prev > 0; // Simple check - could be improved
+            if (!alreadyCounted || isNewInvestment || isIncreasingPosition) {
+              const newCount = prev + 1;
+              console.log(`✅ News-influenced trade detected! Investing in ${company.name} with POSITIVE news on day ${currentDay} (news day: ${todayNews.day}). Total: ${newCount}`);
+              return newCount;
+            }
+            return prev;
+          });
+        } else {
+          console.log(`❌ Not counted: hasNews=${!!todayNews}, isPositiveNews=${isPositiveNews}, hasPosition=${hasPosition}, affected=${todayNews?.affectedStocks?.includes(company?.name || "")}`);
         }
       }
+      
       setAllocations(prev => ({ ...prev, [companyId]: newValue }));
     }
   };
@@ -578,6 +619,35 @@ const startSimulation = () => {
       setPortfolioPeak(totalAllocated);
       setNewsInfluencedTrades(0);
       setMinPortfolioValue(totalAllocated);
+      
+      // For Level 2: Check if user has allocated to stocks with positive news on day 1 or day 2
+      if (currentLevel === 2) {
+        const day1News = levelNews.find(n => n.day === 1 && n.impact === "positive");
+        const day2News = levelNews.find(n => n.day === 2 && n.impact === "positive");
+        
+        let newsInfluencedCount = 0;
+        
+        // Check if user has invested in stocks with positive news on day 1 or 2
+        levelCompanies.forEach(company => {
+          const allocation = allocations[company.id] || 0;
+          if (allocation > 0) {
+            // Check day 1 news
+            if (day1News && day1News.affectedStocks.includes(company.name)) {
+              newsInfluencedCount = 1;
+              console.log(`✅ News-influenced trade detected at start! Investing in ${company.name} with POSITIVE news on day 1.`);
+            }
+            // Check day 2 news (if not already counted)
+            if (newsInfluencedCount === 0 && day2News && day2News.affectedStocks.includes(company.name)) {
+              newsInfluencedCount = 1;
+              console.log(`✅ News-influenced trade detected at start! Investing in ${company.name} with POSITIVE news on day 2.`);
+            }
+          }
+        });
+        
+        if (newsInfluencedCount > 0) {
+          setNewsInfluencedTrades(newsInfluencedCount);
+        }
+      }
       
       // Initialize market mood for level 8
       if (currentLevel === 8) {
@@ -629,19 +699,19 @@ const startSimulation = () => {
         baseChange += 1.5 + Math.random() * 1; // Add ~1.5-2.5 upward bias per day
       }
       
-        let newsImpact = 0;
+      let newsImpact = 0;
 
-        if (todayNews && todayNews.affectedStocks.includes(company.name)) {
+      if (todayNews && todayNews.affectedStocks.includes(company.name)) {
         if (todayNews.impact === "positive") {
           newsImpact = 8 + Math.random() * 7;
         } else if (todayNews.impact === "negative") {
           newsImpact = -(8 + Math.random() * 7);
         }
         // Neutral news has no impact
-        }
+      }
 
-        newPrices[company.id] = Math.max(10, newPrices[company.id] + baseChange + newsImpact);
-      });
+      newPrices[company.id] = Math.max(10, newPrices[company.id] + baseChange + newsImpact);
+    });
 
       // Market mood affects price movement for level 8
       if (currentLevel === 8) {
@@ -702,11 +772,19 @@ const startSimulation = () => {
   };
 
   const checkWinConditions = (): boolean => {
-    if (!simulationStarted || portfolioHistory.length === 0) {
+    if (!simulationStarted) {
       return false;
     }
     
-    const finalValue = portfolioHistory[portfolioHistory.length - 1]?.value || 0;
+    // Calculate final value - use the latest from portfolioHistory, or calculate current value
+    let finalValue: number;
+    if (portfolioHistory.length > 0) {
+      finalValue = portfolioHistory[portfolioHistory.length - 1]?.value || totalAllocated;
+    } else {
+      // Fallback: calculate current portfolio value
+      finalValue = calculatePortfolioValue(stockPrices);
+    }
+    
     const startingValue = portfolioHistory[0]?.value || totalAllocated;
     const winCond = config.winConditions;
 
@@ -719,8 +797,20 @@ const startSimulation = () => {
         return true;
       }
     } else if (currentLevel === 2) {
-      // Portfolio ≥ $11,000 AND at least 1 trade influenced by news
-      if (finalValue >= (winCond.portfolioValue || 11000) && newsInfluencedTrades >= 1) {
+      // Portfolio ≥ $10,200 AND at least 1 trade influenced by news
+      const targetValue = winCond.portfolioValue || 10200;
+      const meetsTarget = finalValue >= targetValue;
+      const hasNewsTrade = newsInfluencedTrades >= 1;
+      
+      // Debug logging
+      console.log(`Level 2 Win Check:`);
+      console.log(`  - currentDay: ${currentDay}, maxDays: ${config.maxDays}`);
+      console.log(`  - finalValue: ${finalValue}, target: ${targetValue}, meetsTarget: ${meetsTarget}`);
+      console.log(`  - newsInfluencedTrades: ${newsInfluencedTrades}, hasNewsTrade: ${hasNewsTrade}`);
+      console.log(`  - portfolioHistory length: ${portfolioHistory.length}`);
+      console.log(`  - Will pass: ${meetsTarget && hasNewsTrade}`);
+      
+      if (meetsTarget && hasNewsTrade) {
         return true;
       }
       return false;
@@ -740,9 +830,9 @@ const startSimulation = () => {
       const withinTradeLimit = tradeCount <= (winCond.maxTrades || 10);
       return portfolioMeetsETF && withinTradeLimit;
     } else if (currentLevel === 5) {
-      // Portfolio ≥ $11,200 AND never drop below $8,500
-      const meetsPortfolioTarget = finalValue >= (winCond.portfolioValue || 11200);
-      const neverDroppedBelow = minPortfolioValue >= (winCond.minPortfolioValue || 8500);
+      // Portfolio ≥ $10,200 AND never drop below $7,500
+      const meetsPortfolioTarget = finalValue >= (winCond.portfolioValue || 10200);
+      const neverDroppedBelow = minPortfolioValue >= (winCond.minPortfolioValue || 7500);
       return meetsPortfolioTarget && neverDroppedBelow;
     } else if (currentLevel === 6) {
       // Average daily return > threshold AND fewer than max trades
@@ -900,7 +990,7 @@ const startSimulation = () => {
           <section className="py-12">
             <div className="container">
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                {(Object.keys(levelConfig) as Level[]).map((level) => {
+                {(Object.keys(levelConfig).map(Number) as Level[]).map((level) => {
                   const config = levelConfig[level];
                   const completed = completedLevels.includes(level);
                   
@@ -1153,7 +1243,7 @@ const startSimulation = () => {
                                   Pass if:
                                 </p>
                                 <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
-                                  <li>Portfolio ≥ <strong className="text-foreground">$11,000</strong></li>
+                                  <li>Portfolio ≥ <strong className="text-foreground">$10,200</strong></li>
                                   <li>AND at least <strong className="text-foreground">1 trade influenced by news</strong></li>
                                 </ul>
                                 <p className="text-xs text-muted-foreground mb-2">
@@ -1216,8 +1306,8 @@ const startSimulation = () => {
                                   Pass if:
                                 </p>
                                 <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
-                                  <li>Portfolio ≥ <strong className="text-foreground">$11,200</strong></li>
-                                  <li>AND never drop below <strong className="text-foreground">$8,500</strong></li>
+                                  <li>Portfolio ≥ <strong className="text-foreground">$10,200</strong></li>
+                                  <li>AND never drop below <strong className="text-foreground">$7,500</strong></li>
                                 </ul>
                                 <p className="text-xs text-muted-foreground mb-2">
                                   <strong className="text-foreground">Note:</strong> Teaches capital preservation.
@@ -1331,25 +1421,25 @@ const startSimulation = () => {
                             );
                           case 11:
                             return (
-                        <>
-                          <p className="text-xs text-muted-foreground mb-2">
-                            <strong className="text-foreground">Goal:</strong> Recognize hidden underperformance
-                          </p>
-                          <p className="text-xs text-muted-foreground mb-2">
-                            <strong className="text-foreground">Duration:</strong> 40 days
-                          </p>
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Pass if:
-                          </p>
-                          <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
-                            <li>Portfolio ≥ <strong className="text-foreground">$11,000</strong></li>
-                            <li>AND ETF underperformed your portfolio</li>
-                          </ul>
-                          <p className="text-xs text-muted-foreground mb-2">
-                            <strong className="text-foreground">Note:</strong> Beating "safe" isn't easy.
-                          </p>
-                          </>
-                          );
+                              <>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  <strong className="text-foreground">Goal:</strong> Recognize hidden underperformance
+                                </p>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  <strong className="text-foreground">Duration:</strong> 40 days
+                                </p>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  Pass if:
+                                </p>
+                                <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
+                                  <li>Portfolio ≥ <strong className="text-foreground">$11,000</strong></li>
+                                  <li>AND ETF underperformed your portfolio</li>
+                                </ul>
+                                <p className="text-xs text-muted-foreground mb-2">
+                                  <strong className="text-foreground">Note:</strong> Beating "safe" isn't easy.
+                                </p>
+                              </>
+                            );
                           case 12:
                             return (
                               <>
@@ -1431,14 +1521,22 @@ const startSimulation = () => {
                               </>
                             );
                           } else if (currentLevel === 2) {
+                            const portfolioMeets = finalValue >= 10200;
+                            const newsTradeMeets = newsInfluencedTrades >= 1;
                             return (
                               <>
                                 <p>
                                   Current: <strong className="text-foreground">${finalValue.toLocaleString()}</strong> • 
-                                  Target: <strong className="text-success">$11,000+</strong>
+                                  Target: <strong className={portfolioMeets ? "text-success" : "text-foreground"}>$10,200+</strong>
+                                  {portfolioMeets ? " ✓" : ""}
                                 </p>
-                                <p className={newsInfluencedTrades >= 1 ? "text-success" : "text-muted-foreground"}>
-                                  News trades: <strong>{newsInfluencedTrades}</strong>/1
+                                <p className={newsTradeMeets ? "text-success" : "text-muted-foreground"}>
+                                  News trades: <strong>{newsInfluencedTrades}</strong>/1 {newsTradeMeets ? "✓" : ""}
+                                  {newsInfluencedTrades === 0 && (
+                                    <span className="block text-xs mt-1 text-muted-foreground">
+                                      Tip: Trade a stock on the same day news affects it!
+                                    </span>
+                                  )}
                                 </p>
                               </>
                             );
@@ -1472,10 +1570,10 @@ const startSimulation = () => {
                               <>
                                 <p>
                                   Current: <strong className="text-foreground">${finalValue.toLocaleString()}</strong> • 
-                                  Target: <strong className="text-success">$11,200+</strong>
+                                  Target: <strong className={finalValue >= 10200 ? "text-success" : "text-foreground"}>$10,200+</strong>
                                 </p>
                                 <p>
-                                  Min Value: <strong className={minPortfolioValue >= 8500 ? "text-success" : "text-destructive"}>${minPortfolioValue.toLocaleString()}</strong> (need ≥$8,500)
+                                  Min Value: <strong className={minPortfolioValue >= 7500 ? "text-success" : "text-destructive"}>${minPortfolioValue.toLocaleString()}</strong> (need ≥$7,500)
                                 </p>
                               </>
                             );
@@ -1673,7 +1771,7 @@ const startSimulation = () => {
                                   Pass if:
                                 </p>
                                 <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
-                                  <li>Portfolio ≥ <strong className="text-foreground">$11,000</strong></li>
+                                  <li>Portfolio ≥ <strong className="text-foreground">$10,200</strong></li>
                                   <li>AND at least <strong className="text-foreground">1 trade influenced by news</strong></li>
                                 </ul>
                                 <p className="text-xs text-muted-foreground mb-2">
@@ -1736,8 +1834,8 @@ const startSimulation = () => {
                                   Pass if:
                                 </p>
                                 <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
-                                  <li>Portfolio ≥ <strong className="text-foreground">$11,200</strong></li>
-                                  <li>AND never drop below <strong className="text-foreground">$8,500</strong></li>
+                                  <li>Portfolio ≥ <strong className="text-foreground">$10,200</strong></li>
+                                  <li>AND never drop below <strong className="text-foreground">$7,500</strong></li>
                                 </ul>
                                 <p className="text-xs text-muted-foreground mb-2">
                                   <strong className="text-foreground">Note:</strong> Teaches capital preservation.
