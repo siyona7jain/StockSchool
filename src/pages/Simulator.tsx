@@ -230,7 +230,6 @@ const levelConfig = {
     volatilityMultiplier: 1.0,
     winConditions: {
       outperformETF: true, // Portfolio ≥ ETF value
-      maxTrades: 10, // Total trades ≤ 10
     },
   },
   5: {
@@ -1027,15 +1026,14 @@ const startSimulation = () => {
       const withinMaxDrawdown = maxDrawdown <= (winCond.maxDrawdown || 0.10);
       return meetsPortfolioTarget && withinMaxDrawdown;
     } else if (currentLevel === 4) {
-      // Portfolio ≥ ETF value AND total trades ≤ 10
+      // Portfolio ≥ ETF value
       const etfReturn = levelCompanies.reduce((sum, company) => {
         const returnPercent = (stockPrices[company.id] - company.currentValue) / company.currentValue;
         return sum + returnPercent;
       }, 0) / levelCompanies.length;
       const etfValue = startingValue * (1 + etfReturn);
       const portfolioMeetsETF = finalValue >= etfValue;
-      const withinTradeLimit = tradeCount <= (winCond.maxTrades || 10);
-      return portfolioMeetsETF && withinTradeLimit;
+      return portfolioMeetsETF;
     } else if (currentLevel === 5) {
       // Bull market: Portfolio ≥ $11,000 OR Bear market: Portfolio ≥ $9,800
       // AND never drop below $7,500
@@ -1602,7 +1600,6 @@ const startSimulation = () => {
                                 </p>
                                 <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
                                   <li>Portfolio ≥ <strong className="text-foreground">ETF value</strong></li>
-                                  <li>AND total trades ≤ <strong className="text-foreground">10</strong></li>
                                 </ul>
                                 <p className="text-xs text-muted-foreground mb-2">
                                   <strong className="text-foreground">Note:</strong> This is a thinking level, not a trading level.
@@ -1866,8 +1863,7 @@ const startSimulation = () => {
                             return (
                               <>
                                 <p>
-                                  Current: <strong className="text-foreground">${finalValue.toLocaleString()}</strong> • 
-                                  Trades: <strong className={tradeCount <= 10 ? "text-success" : "text-destructive"}>{tradeCount}</strong>/10
+                                  Current: <strong className="text-foreground">${finalValue.toLocaleString()}</strong>
                                 </p>
                                 <p className={returnPercent > 0 ? "text-success" : ""}>
                                   Need: Portfolio ≥ ETF value
@@ -2173,7 +2169,6 @@ const startSimulation = () => {
                                 </p>
                                 <ul className="text-xs text-muted-foreground space-y-1 mb-3 list-disc list-inside">
                                   <li>Portfolio ≥ <strong className="text-foreground">ETF value</strong></li>
-                                  <li>AND total trades ≤ <strong className="text-foreground">10</strong></li>
                                 </ul>
                                 <p className="text-xs text-muted-foreground mb-2">
                                   <strong className="text-foreground">Note:</strong> This is a thinking level, not a trading level.

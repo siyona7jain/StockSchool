@@ -94,7 +94,7 @@ function FeaturePreview({
   delay: string;
 }) {
   return (
-    <Card variant="interactive" className={`animate-slide-up ${delay}`}>
+    <Card variant="default" className={`animate-slide-up ${delay}`}>
       <CardHeader className="pb-2">
         <div className="inline-flex h-14 w-14 items-center justify-center rounded-xl bg-accent-lighter text-accent mb-3">
           <Icon className="h-7 w-7" />

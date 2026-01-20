@@ -9,7 +9,7 @@ import {
   ChevronRight, CheckCircle2, Lock, Sparkles, ArrowRight, MessageCircle,
   Shield, Clock, Wallet, BarChart3, Target, Calendar, DollarSign, Globe, Store, Briefcase, RefreshCw, AlertTriangle, X
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { AITutor } from "@/components/learn/AITutor";
 import { useAuth } from "@/contexts/AuthContext";
 import { loadProgress } from "@/lib/progressStorage";
@@ -230,6 +230,7 @@ const lessons = [
 ];
 
 const Learn = () => {
+  const [searchParams] = useSearchParams();
   const [selectedLesson, setSelectedLesson] = useState<string | null>(null);
   const { user } = useAuth();
   const [completedLessons, setCompletedLessons] = useState<string[]>([]);
@@ -241,6 +242,18 @@ const Learn = () => {
       setCompletedLessons(progress.completedLessons);
     }
   }, [user]);
+
+  // Set selected lesson from URL parameter on mount
+  useEffect(() => {
+    const lessonParam = searchParams.get("lesson");
+    if (lessonParam) {
+      // Verify the lesson ID exists in the lessons array
+      const lessonExists = lessons.some(lesson => lesson.id === lessonParam);
+      if (lessonExists) {
+        setSelectedLesson(lessonParam);
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
